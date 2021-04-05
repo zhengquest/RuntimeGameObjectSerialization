@@ -5,7 +5,6 @@ using System.Reflection;
 using Newtonsoft.Json.Linq;
 using TypeReferences;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UiManager: MonoBehaviour
 {
@@ -18,9 +17,9 @@ public class UiManager: MonoBehaviour
 
     private Dictionary<TabButton, GameObject> tabPropertyDict;
     
-    public void CreateUiForBehaviour(TypeReference[] inGameBehaviours)
+    public void CreateUiForBehaviour(Dictionary<TypeReference, JObject> inGameBehaviours)
     {
-        tabPropertyDict = new Dictionary<TabButton, GameObject>(inGameBehaviours.Length);
+        tabPropertyDict = new Dictionary<TabButton, GameObject>(inGameBehaviours.Count);
         
         foreach (var behaviour in inGameBehaviours)
         {
@@ -28,19 +27,13 @@ public class UiManager: MonoBehaviour
             var newPropertyUi = Instantiate(behaviourPropertyUi, behaviourSection);
             tabPropertyDict.Add(newTabBtn, newPropertyUi);
             
-            foreach (var fieldInfo in behaviour.Type.GetFields())
+            foreach (var fieldInfo in behaviour.Key.Type.GetFields())
             {
-                CreateUiForBehaviourField(fieldInfo, newPropertyUi.transform);
+                CreateUiForBehaviourField(fieldInfo, newPropertyUi.transform, behaviour.Value);
             }
         }
 
         OnTabButtonClick(tabPropertyDict.Keys.First());
-        // foreach (var propertyUi in tabPropertyDict.Values)
-        // {
-        //     propertyUi.SetActive(false);
-        // }
-        //
-        // tabPropertyDict.Values.First().SetActive(true);
     }
 
     public void OnTabButtonClick(TabButton tabButtonClicked)
@@ -51,20 +44,19 @@ public class UiManager: MonoBehaviour
         }
     }
 
-
-    public void CreateUiForBehaviourField(FieldInfo fieldInfo, Transform parent, Action<JObject> valueChangeCallback = null)
+    public void CreateUiForBehaviourField(FieldInfo fieldInfo, Transform parent, JObject associatedJobject)
     {
         if (fieldInfo.FieldType == typeof(int))
         {
-            Instantiate(sliderUi, parent).SetupSliderForIntType(fieldInfo.Name, 100);
+            Instantiate(sliderUi, parent).SetupSliderForIntType(fieldInfo.Name, 100, associatedJobject.Property(fieldInfo.Name));
         }
         else if (fieldInfo.FieldType == typeof(float))
         {
-            Instantiate(sliderUi, parent).SetupSliderForFloatType(fieldInfo.Name, 100f);
+            Instantiate(sliderUi, parent).SetupSliderForFloatType(fieldInfo.Name, 100f, associatedJobject.Property(fieldInfo.Name));
         }
         else if (fieldInfo.FieldType == typeof(string))
         { 
-            Instantiate(TextUi, parent).SetupTextUi(fieldInfo.Name, "");
+            Instantiate(TextUi, parent).SetupTextUi(fieldInfo.Name, "", associatedJobject.Property(fieldInfo.Name));
         }
     }
 }
