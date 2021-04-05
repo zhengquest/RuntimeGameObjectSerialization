@@ -27,8 +27,15 @@ public class EntityManager : MonoBehaviour
         chosenInGameBehaviour = inGameBehaviours[0];
         CreateTypeToJobjectDict();
 
+        UiManager.CreateUiForObjects(inGameObjects, OnObjectSelectCallback);
         UiManager.CreateUiForBehaviours(typeJobjectDict);
         UiManager.SetupSaveCallback(SaveCustomizedEntity);
+    }
+
+    private void OnObjectSelectCallback(AssetReferenceGameObject goRef)
+    {
+        chosenInGameObject = goRef;
+        Debug.Log($"selectied gameobject {chosenInGameObject}");
     }
 
     private void CreateTypeToJobjectDict()

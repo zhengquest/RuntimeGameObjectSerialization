@@ -5,6 +5,7 @@ using System.Reflection;
 using Newtonsoft.Json.Linq;
 using TypeReferences;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 public class UiManager: MonoBehaviour
@@ -13,12 +14,16 @@ public class UiManager: MonoBehaviour
     public SliderUi sliderUi;
     public GameObject behaviourPropertyUi;
     public TabButton behaviourButtonUi;
+    public TabButton objectButtonUi;
+    public RectTransform objectButtonParent;
     public RectTransform behaviourTab;
     public RectTransform behaviourSection;
     public Button saveButton;
-    private Dictionary<TabButton, GameObject> tabPropertyDict;
     
-    public void CreateUiForBehaviour(Dictionary<TypeReference, JObject> inGameBehaviours)
+    private Dictionary<TabButton, GameObject> tabPropertyDict;
+    private List<TabButton> selectObjectsBtn;
+
+    public void CreateUiForBehaviours(Dictionary<TypeReference, JObject> inGameBehaviours)
     {
         tabPropertyDict = new Dictionary<TabButton, GameObject>(inGameBehaviours.Count);
         
@@ -64,5 +69,25 @@ public class UiManager: MonoBehaviour
     public void SetupSaveCallback(Action saveCustomizedEntity)
     {
         saveButton.onClick.AddListener(() => { saveCustomizedEntity(); });
+    }
+
+    public void CreateUiForObjects(AssetReferenceGameObject[] inGameObjects, Action<AssetReferenceGameObject> onSelectCallback)
+    {
+        selectObjectsBtn = new List<TabButton>(inGameObjects.Length);
+
+        foreach (var inGameObject in inGameObjects)
+        {
+            var objectSelectBtn = Instantiate(objectButtonUi, objectButtonParent);
+            objectSelectBtn.onClick.AddListener(() =>
+            {
+                onSelectCallback.Invoke(inGameObject);
+                foreach (var button in selectObjectsBtn)
+                {
+                    button.ToggleHighlight(objectSelectBtn == button);
+                }
+            });
+            
+            selectObjectsBtn.Add(objectSelectBtn);
+        }
     }
 }
