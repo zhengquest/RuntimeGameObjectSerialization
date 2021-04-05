@@ -5,6 +5,7 @@ using System.Reflection;
 using Newtonsoft.Json.Linq;
 using TypeReferences;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UiManager: MonoBehaviour
 {
@@ -14,7 +15,7 @@ public class UiManager: MonoBehaviour
     public TabButton behaviourButtonUi;
     public RectTransform behaviourTab;
     public RectTransform behaviourSection;
-
+    public Button saveButton;
     private Dictionary<TabButton, GameObject> tabPropertyDict;
     
     public void CreateUiForBehaviour(Dictionary<TypeReference, JObject> inGameBehaviours)
@@ -58,5 +59,10 @@ public class UiManager: MonoBehaviour
         { 
             Instantiate(TextUi, parent).SetupTextUi(fieldInfo.Name, "", associatedJobject.Property(fieldInfo.Name));
         }
+    }
+
+    public void SetupSaveCallback(Action saveCustomizedEntity)
+    {
+        saveButton.onClick.AddListener(() => { saveCustomizedEntity(); });
     }
 }
