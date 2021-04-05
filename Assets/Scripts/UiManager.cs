@@ -31,6 +31,7 @@ public class UiManager: MonoBehaviour
         {
             var newTabBtn = Instantiate(behaviourButtonUi, behaviourTab);
             var newPropertyUi = Instantiate(behaviourPropertyUi, behaviourSection);
+            newTabBtn.ChangeName(behaviour.Key.Type.Name);
             tabPropertyDict.Add(newTabBtn, newPropertyUi);
             
             foreach (var fieldInfo in behaviour.Key.Type.GetFields())

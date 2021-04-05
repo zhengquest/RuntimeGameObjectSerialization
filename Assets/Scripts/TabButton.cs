@@ -5,11 +5,13 @@ public class TabButton : Button
 {
     private UiManager uiManager;
     private Image btnImg;
+    private Text btnName;
 
-    protected override void Start()
+    protected override void Awake()
     {
-        base.Start();
+        base.Awake();
         uiManager = GetComponentInParent<UiManager>();
+        btnName = GetComponentInChildren<Text>();
         btnImg = GetComponent<Image>();
     }
 
@@ -21,5 +23,10 @@ public class TabButton : Button
     public void OnClickTabBtn()
     {
         uiManager.OnTabButtonClick(this);
+    }
+
+    public void ChangeName(string name)
+    {
+        btnName.text = name;
     }
 }
