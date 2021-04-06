@@ -17,14 +17,11 @@ public class EntityManager : MonoBehaviour
     
     private string path;
     private AssetReferenceGameObject chosenInGameObject;
-    private TypeReference chosenInGameBehaviour;
-    private Dictionary<TypeReference, JObject> typeJobjectDict;
+    private Dictionary<TypeReference, JobjectContainer> typeJobjectDict;
     
     private void Start()
     {
         path = Path.Combine(Application.persistentDataPath, "Test.txt");
-        chosenInGameObject = inGameObjects[0];
-        chosenInGameBehaviour = inGameBehaviours[0];
         CreateTypeToJobjectDict();
 
         UiManager.CreateUiForObjects(inGameObjects, OnObjectSelectCallback);
@@ -35,12 +32,11 @@ public class EntityManager : MonoBehaviour
     private void OnObjectSelectCallback(AssetReferenceGameObject goRef)
     {
         chosenInGameObject = goRef;
-        Debug.Log($"selectied gameobject {chosenInGameObject}");
     }
 
     private void CreateTypeToJobjectDict()
     {
-        typeJobjectDict = new Dictionary<TypeReference, JObject>(inGameBehaviours.Length);
+        typeJobjectDict = new Dictionary<TypeReference, JobjectContainer>(inGameBehaviours.Length);
 
         foreach (var inGameBehaviour in inGameBehaviours)
         {
@@ -48,7 +44,7 @@ public class EntityManager : MonoBehaviour
         }
     }
 
-    private JObject CreateJobjectForBehaviour(Type type)
+    private JobjectContainer CreateJobjectForBehaviour(Type type)
     {
         var serializeFields = type.GetFields();
 
@@ -59,7 +55,10 @@ public class EntityManager : MonoBehaviour
             jProperties.Add(new JProperty(fieldInfo.Name, 0));
         }
 
-        return new JObject(jProperties);
+        return new JobjectContainer
+        {
+            jObject = new JObject(jProperties)
+        };
     }
 
     public void SaveCustomizedEntity()
@@ -71,10 +70,14 @@ public class EntityManager : MonoBehaviour
         
         foreach (var addedBehaviour in typeJobjectDict.Keys)
         {
-            savedEntityData.savedBehaviours.Add(new SavedBehaviour
+            var jobjectContainer = typeJobjectDict[addedBehaviour];
+            if (jobjectContainer.attachToEntity)
             {
-                behaviourType = addedBehaviour, behaviourData = typeJobjectDict[addedBehaviour].ToString()
-            });
+                savedEntityData.savedBehaviours.Add(new SavedBehaviour
+                {
+                    behaviourType = addedBehaviour, behaviourData = jobjectContainer.jObject.ToString()
+                });
+            }
         }
 
         var serializedData = JsonUtility.ToJson(savedEntityData, true);
@@ -116,5 +119,12 @@ public class SavedEntity
 public class SavedBehaviour
 {
     public TypeReference behaviourType;
-    public string behaviourData; //json or pure string or bytes
+    public string behaviourData; 
+}
+
+[Serializable]
+public class JobjectContainer
+{
+    public JObject jObject;
+    public bool attachToEntity;
 }

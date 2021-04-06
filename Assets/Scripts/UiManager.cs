@@ -7,12 +7,13 @@ using TypeReferences;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 public class UiManager: MonoBehaviour
 {
     public TextUi TextUi;
     public SliderUi sliderUi;
-    public GameObject behaviourPropertyUi;
+    public PropertiesUi behaviourPropertyUi;
     public TabButton behaviourButtonUi;
     public TabButton objectButtonUi;
     public RectTransform objectButtonParent;
@@ -20,23 +21,26 @@ public class UiManager: MonoBehaviour
     public RectTransform behaviourSection;
     public Button saveButton;
     
-    private Dictionary<TabButton, GameObject> tabPropertyDict;
+    private Dictionary<TabButton, PropertiesUi> tabPropertyDict;
     private List<TabButton> selectObjectsBtn;
 
-    public void CreateUiForBehaviours(Dictionary<TypeReference, JObject> inGameBehaviours)
+    public void CreateUiForBehaviours(Dictionary<TypeReference, JobjectContainer> inGameBehaviours)
     {
-        tabPropertyDict = new Dictionary<TabButton, GameObject>(inGameBehaviours.Count);
+        tabPropertyDict = new Dictionary<TabButton, PropertiesUi>(inGameBehaviours.Count);
         
         foreach (var behaviour in inGameBehaviours)
         {
-            var newTabBtn = Instantiate(behaviourButtonUi, behaviourTab);
-            var newPropertyUi = Instantiate(behaviourPropertyUi, behaviourSection);
-            newTabBtn.ChangeName(behaviour.Key.Type.Name);
-            tabPropertyDict.Add(newTabBtn, newPropertyUi);
+            var newBehaviourTabBtn = Instantiate(behaviourButtonUi, behaviourTab);
+            var newBehaviourPropertyUi = Instantiate(behaviourPropertyUi, behaviourSection);
+            
+            newBehaviourTabBtn.ChangeName(behaviour.Key.Type.Name);
+            newBehaviourPropertyUi.SetAttachToEntityToggleCallback(behaviour.Value);
+            
+            tabPropertyDict.Add(newBehaviourTabBtn, newBehaviourPropertyUi);
             
             foreach (var fieldInfo in behaviour.Key.Type.GetFields())
             {
-                CreateUiForBehaviourField(fieldInfo, newPropertyUi.transform, behaviour.Value);
+                CreateUiForBehaviourField(fieldInfo, newBehaviourPropertyUi.transform, behaviour.Value);
             }
         }
 
@@ -47,23 +51,23 @@ public class UiManager: MonoBehaviour
     {
         foreach (var tab in tabPropertyDict.Keys)
         {
-            tabPropertyDict[tab].SetActive(tab == tabButtonClicked);
+            tabPropertyDict[tab].gameObject.SetActive(tab == tabButtonClicked);
         }
     }
 
-    public void CreateUiForBehaviourField(FieldInfo fieldInfo, Transform parent, JObject associatedJobject)
+    public void CreateUiForBehaviourField(FieldInfo fieldInfo, Transform parent, JobjectContainer associatedJobject)
     {
         if (fieldInfo.FieldType == typeof(int))
         {
-            Instantiate(sliderUi, parent).SetupSliderForIntType(fieldInfo.Name, 100, associatedJobject.Property(fieldInfo.Name));
+            Instantiate(sliderUi, parent).SetupSliderForIntType(fieldInfo.Name, 100, associatedJobject.jObject.Property(fieldInfo.Name));
         }
         else if (fieldInfo.FieldType == typeof(float))
         {
-            Instantiate(sliderUi, parent).SetupSliderForFloatType(fieldInfo.Name, 100f, associatedJobject.Property(fieldInfo.Name));
+            Instantiate(sliderUi, parent).SetupSliderForFloatType(fieldInfo.Name, 100f, associatedJobject.jObject.Property(fieldInfo.Name));
         }
         else if (fieldInfo.FieldType == typeof(string))
         { 
-            Instantiate(TextUi, parent).SetupTextUi(fieldInfo.Name, "", associatedJobject.Property(fieldInfo.Name));
+            Instantiate(TextUi, parent).SetupTextUi(fieldInfo.Name, "", associatedJobject.jObject.Property(fieldInfo.Name));
         }
     }
 
