@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -13,20 +14,50 @@ public class EntityManager : MonoBehaviour
     [Inherits(typeof(IBehaviour))] 
     public TypeReference[] inGameBehaviours;
 
-    public UiManager UiManager;
+    public CreatorUiManager creatorUiManager;
+    public TestModeUiManager testUiManager;
+    public GameObject floor;
     
     private string path;
     private AssetReferenceGameObject chosenInGameObject;
     private Dictionary<TypeReference, JobjectContainer> typeJobjectDict;
-    
+    private SavedEntities entities;
+
     private void Start()
     {
-        path = Path.Combine(Application.persistentDataPath, "Test.txt");
+        path = Path.Combine(Application.persistentDataPath, "SavedEntities.txt");
+
+        DeserializeSavedEntities();
         CreateTypeToJobjectDict();
 
-        UiManager.CreateUiForObjects(inGameObjects, OnObjectSelectCallback);
-        UiManager.CreateUiForBehaviours(typeJobjectDict);
-        UiManager.SetupSaveCallback(SaveCustomizedEntity);
+        creatorUiManager.CreateUiForObjects(inGameObjects, OnObjectSelectCallback);
+        creatorUiManager.CreateUiForBehaviours(typeJobjectDict);
+        creatorUiManager.SetupSaveCallback(SaveCustomizedEntity);
+        creatorUiManager.SetupTestModeCallback(TestModeBtnCallback);
+    }
+
+    private void TestModeBtnCallback()
+    {
+        SetupTestModeUi();
+        testUiManager.ToggleVisible(true);
+    }
+
+    private void SetupTestModeUi()
+    {
+        var savedEntites = GetSavedEntities();
+        if (savedEntites != null)
+        {
+            testUiManager.CreateUiForCustomEntities(savedEntites, OnEnterCreateMode);
+        }
+    }
+
+    private void OnEnterCreateMode()
+    {
+        creatorUiManager.ToggleVisible(true);
+        for (int i = 0; i < floor.transform.childCount; i++)
+        {
+            Destroy(floor.transform.GetChild(i).gameObject);
+        }
     }
 
     private void OnObjectSelectCallback(AssetReferenceGameObject goRef)
@@ -44,21 +75,20 @@ public class EntityManager : MonoBehaviour
         }
     }
 
+    private IEnumerable<SavedEntity> GetSavedEntities()
+    {
+        DeserializeSavedEntities();
+        return entities.savedEntitiesList;
+    }
+
     private JobjectContainer CreateJobjectForBehaviour(Type type)
     {
         var serializeFields = type.GetFields();
-
         var jProperties = new List<JProperty>(serializeFields.Length);
-        foreach (var fieldInfo in serializeFields)
-        {
-            Debug.Log($"{fieldInfo}");
-            jProperties.Add(new JProperty(fieldInfo.Name, 0));
-        }
+        
+        jProperties.AddRange(serializeFields.Select(fieldInfo => new JProperty(fieldInfo.Name, 0)));
 
-        return new JobjectContainer
-        {
-            jObject = new JObject(jProperties)
-        };
+        return new JobjectContainer { jObject = new JObject(jProperties) };
     }
 
     public void SaveCustomizedEntity()
@@ -79,33 +109,43 @@ public class EntityManager : MonoBehaviour
                 });
             }
         }
-
-        var serializedData = JsonUtility.ToJson(savedEntityData, true);
-        Debug.Log(serializedData);
+        
+        entities.savedEntitiesList.Add(savedEntityData);
+        var serializedData = JsonUtility.ToJson(entities, true);
         File.WriteAllText(path, serializedData);
 
-        DeserializeSavedEntity();
+        Debug.Log(serializedData);
     }
 
-    public void DeserializeSavedEntity()
+    public void DeserializeSavedEntities()
     {
+        if (!File.Exists(path))
+        {
+            entities = new SavedEntities();
+            return;
+        }
+        
         var data = File.ReadAllText(path);
-        var entity = JsonUtility.FromJson(data, typeof(SavedEntity)) as SavedEntity;
-        Debug.Log(entity);
-
-        SpawnEntityAsync(entity);
+        entities = JsonUtility.FromJson(data, typeof(SavedEntities)) as SavedEntities;
     }
 
-    private async void SpawnEntityAsync(SavedEntity savedEntity) 
+    public async void SpawnEntityAsync(SavedEntity savedEntity, Vector3 spawnPoint) 
     {
-        var go = await savedEntity.inGameObject.InstantiateAsync().Task;
-
+        var go = await savedEntity.inGameObject.InstantiateAsync(floor.transform).Task;
+        go.transform.position = spawnPoint;
+        
         foreach (var savedBehaviour in savedEntity.savedBehaviours)
         {
             var behaviour = go.AddComponent(savedBehaviour.behaviourType);
             JsonUtility.FromJsonOverwrite(savedBehaviour.behaviourData, behaviour);            
         }
     }
+}
+
+[Serializable]
+public class SavedEntities
+{
+    public List<SavedEntity> savedEntitiesList = new List<SavedEntity>();
 }
 
 [Serializable]

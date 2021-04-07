@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json.Linq;
 using TypeReferences;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
-public class UiManager: MonoBehaviour
+public class CreatorUiManager: MonoBehaviour
 {
+    public Canvas canvas;
     public TextUi TextUi;
     public SliderUi sliderUi;
     public PropertiesUi behaviourPropertyUi;
@@ -20,7 +19,8 @@ public class UiManager: MonoBehaviour
     public RectTransform behaviourTab;
     public RectTransform behaviourSection;
     public Button saveButton;
-    
+    public Button testModeButton;
+
     private Dictionary<TabButton, PropertiesUi> tabPropertyDict;
     private List<TabButton> selectObjectsBtn;
 
@@ -73,7 +73,21 @@ public class UiManager: MonoBehaviour
 
     public void SetupSaveCallback(Action saveCustomizedEntity)
     {
-        saveButton.onClick.AddListener(() => { saveCustomizedEntity(); });
+        saveButton.onClick.AddListener(() => { saveCustomizedEntity?.Invoke(); });
+    }
+    
+    public void SetupTestModeCallback(Action callback)
+    {
+        testModeButton.onClick.AddListener(() =>
+        {
+            canvas.enabled = false;
+            callback?.Invoke();
+        });
+    }
+    
+    public void ToggleVisible(bool toggle)
+    {
+        canvas.enabled = toggle;
     }
 
     public void CreateUiForObjects(AssetReferenceGameObject[] inGameObjects, Action<AssetReferenceGameObject> onSelectCallback)

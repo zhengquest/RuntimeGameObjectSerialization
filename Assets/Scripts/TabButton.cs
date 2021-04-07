@@ -3,14 +3,14 @@ using UnityEngine.UI;
 
 public class TabButton : Button
 {
-    private UiManager uiManager;
+    private CreatorUiManager creatorUiManager;
     private Image btnImg;
     private Text btnName;
 
     protected override void Awake()
     {
         base.Awake();
-        uiManager = GetComponentInParent<UiManager>();
+        creatorUiManager = GetComponentInParent<CreatorUiManager>();
         btnName = GetComponentInChildren<Text>();
         btnImg = GetComponent<Image>();
     }
@@ -22,7 +22,7 @@ public class TabButton : Button
     
     public void OnClickTabBtn()
     {
-        uiManager.OnTabButtonClick(this);
+        creatorUiManager.OnTabButtonClick(this);
     }
 
     public void ChangeName(string name)
