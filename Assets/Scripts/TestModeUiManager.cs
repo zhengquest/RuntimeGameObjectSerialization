@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static SerializeDataClasses;
 
 public class TestModeUiManager : MonoBehaviour
 {
@@ -40,6 +41,8 @@ public class TestModeUiManager : MonoBehaviour
             newSelectBtn.ChangeName(savedEntity.inGameObject.SubObjectName);
             selectObjectsBtn.Add(newSelectBtn);
         }
+        
+        ToggleVisible(true);
     }
 
     public void OnLeaveTestMode()

@@ -6,11 +6,12 @@ using TypeReferences;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
+using static SerializeDataClasses;
 
 public class CreatorUiManager: MonoBehaviour
 {
     public Canvas canvas;
-    public TextUi TextUi;
+    public TextUi textUi;
     public SliderUi sliderUi;
     public PropertiesUi behaviourPropertyUi;
     public TabButton behaviourButtonUi;
@@ -24,7 +25,7 @@ public class CreatorUiManager: MonoBehaviour
     private Dictionary<TabButton, PropertiesUi> tabPropertyDict;
     private List<TabButton> selectObjectsBtn;
 
-    public void CreateUiForBehaviours(Dictionary<TypeReference, JobjectContainer> inGameBehaviours)
+    public void CreateUiForBehaviours(Dictionary<TypeReference, JsonData> inGameBehaviours)
     {
         tabPropertyDict = new Dictionary<TabButton, PropertiesUi>(inGameBehaviours.Count);
         
@@ -55,7 +56,7 @@ public class CreatorUiManager: MonoBehaviour
         }
     }
 
-    public void CreateUiForBehaviourField(FieldInfo fieldInfo, Transform parent, JobjectContainer associatedJobject)
+    public void CreateUiForBehaviourField(FieldInfo fieldInfo, Transform parent, JsonData associatedJobject)
     {
         if (fieldInfo.FieldType == typeof(int))
         {
@@ -67,7 +68,7 @@ public class CreatorUiManager: MonoBehaviour
         }
         else if (fieldInfo.FieldType == typeof(string))
         { 
-            Instantiate(TextUi, parent).SetupTextUi(fieldInfo.Name, "", associatedJobject.jObject.Property(fieldInfo.Name));
+            Instantiate(textUi, parent).SetupTextUi(fieldInfo.Name, "", associatedJobject.jObject.Property(fieldInfo.Name));
         }
     }
 
