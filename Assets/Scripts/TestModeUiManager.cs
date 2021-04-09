@@ -16,16 +16,16 @@ public class TestModeUiManager : MonoBehaviour
     private SavedEntity selectedEntity;
     private List<TabButton> selectObjectsBtn;
 
-    public void CreateUiForCustomEntities(IEnumerable<SavedEntity> savedEntites, Action OnEnterCreateMode)
+    public void CreateUiForCustomEntities(IEnumerable<SavedEntity> savedEntities, Action onEnterCreateMode)
     {
         selectObjectsBtn = new List<TabButton>();
         createModeBtn.onClick.AddListener(() =>
         {
-            OnEnterCreateMode?.Invoke();
+            onEnterCreateMode?.Invoke();
             OnLeaveTestMode();
         });
         
-        foreach (var savedEntity in savedEntites)
+        foreach (var savedEntity in savedEntities)
         {
             var newSelectBtn = Instantiate(behaviourButtonUi, behaviourTab);
             newSelectBtn.onClick.AddListener(() =>

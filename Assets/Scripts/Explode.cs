@@ -11,7 +11,7 @@ public class Explode : MonoBehaviour, IBehaviour
 
     private void OnMouseDown()
     {
-        Debug.Log($"EXPLODE! radius: {explosionRadius} {particleId}");
+        Debug.Log($"EXPLODE! explosionId: {explosionId} radius: {explosionRadius} particleId : {particleId}");
         Destroy(gameObject);
     }
 }

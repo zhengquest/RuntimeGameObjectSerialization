@@ -527,7 +527,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 4032300230855174661}
-  TextUi: {fileID: 5015398314184850848, guid: 8d7d63f78fff53c4f8d8c4cb00a57275, type: 3}
+  textUi: {fileID: 5015398314184850848, guid: 8d7d63f78fff53c4f8d8c4cb00a57275, type: 3}
   sliderUi: {fileID: 5362937262720389671, guid: 3d5dce7afb0c7e74da288cf27c55df65,
     type: 3}
   behaviourPropertyUi: {fileID: 1785765630068674652, guid: 632ebe54f8636ad4cad3a3ab4a48fd95,
@@ -757,6 +757,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4032300230855174662}
     m_Modifications:
+    - target: {fileID: 7065049521829685098, guid: 0ed01aa5dc6a7834f894abde04f6e3c4,
+        type: 3}
+      propertyPath: m_Size
+      value: 0.9999999
+      objectReference: {fileID: 0}
     - target: {fileID: 7065049521829685098, guid: 0ed01aa5dc6a7834f894abde04f6e3c4,
         type: 3}
       propertyPath: m_Value

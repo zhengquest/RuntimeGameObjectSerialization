@@ -22,12 +22,12 @@ public class CreatorUiManager: MonoBehaviour
     public Button saveButton;
     public Button testModeButton;
 
-    private Dictionary<TabButton, PropertiesUi> tabPropertyDict;
+    private Dictionary<TabButton, PropertiesUi> propertyUiByButton;
     private List<TabButton> selectObjectsBtn;
 
     public void CreateUiForBehaviours(Dictionary<TypeReference, JsonData> inGameBehaviours)
     {
-        tabPropertyDict = new Dictionary<TabButton, PropertiesUi>(inGameBehaviours.Count);
+        propertyUiByButton = new Dictionary<TabButton, PropertiesUi>(inGameBehaviours.Count);
         
         foreach (var behaviour in inGameBehaviours)
         {
@@ -37,7 +37,7 @@ public class CreatorUiManager: MonoBehaviour
             newBehaviourTabBtn.ChangeName(behaviour.Key.Type.Name);
             newBehaviourPropertyUi.SetAttachToEntityToggleCallback(behaviour.Value);
             
-            tabPropertyDict.Add(newBehaviourTabBtn, newBehaviourPropertyUi);
+            propertyUiByButton.Add(newBehaviourTabBtn, newBehaviourPropertyUi);
             
             foreach (var fieldInfo in behaviour.Key.Type.GetFields())
             {
@@ -45,14 +45,14 @@ public class CreatorUiManager: MonoBehaviour
             }
         }
 
-        OnTabButtonClick(tabPropertyDict.Keys.First());
+        OnTabButtonClick(propertyUiByButton.Keys.First());
     }
 
     public void OnTabButtonClick(TabButton tabButtonClicked)
     {
-        foreach (var tab in tabPropertyDict.Keys)
+        foreach (var tab in propertyUiByButton.Keys)
         {
-            tabPropertyDict[tab].gameObject.SetActive(tab == tabButtonClicked);
+            propertyUiByButton[tab].gameObject.SetActive(tab == tabButtonClicked);
         }
     }
 
