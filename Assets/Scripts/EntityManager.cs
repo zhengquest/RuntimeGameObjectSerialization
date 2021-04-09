@@ -23,6 +23,7 @@ public class EntityManager : MonoBehaviour
     private AssetReferenceGameObject chosenInGameObject;
     private Dictionary<TypeReference, JsonData> userCustomDataByBehaviours;
     private SavedEntities savedEntities;
+    private string deserializedData;
 
     private void Start()
     {
@@ -90,7 +91,7 @@ public class EntityManager : MonoBehaviour
     {
         if (chosenInGameObject == null)
         {
-            Debug.Log("can't save due to no in game object chosen");
+            Debug.LogError("can't save due to no in game object chosen");
             return;
         }
         
@@ -111,11 +112,19 @@ public class EntityManager : MonoBehaviour
             }
         }
         
-        savedEntities.savedEntitiesList.Add(savedEntityData);
-        var serializedData = JsonUtility.ToJson(savedEntities, true);
-        File.WriteAllText(saveEntitiesPath, serializedData);
+        var serializedEntity = JsonUtility.ToJson(savedEntityData);
+        if (deserializedData != null && deserializedData.Contains(serializedEntity))
+        {
+            Debug.LogError("an identical entity has been saved before. abort");
+            return;
+        }
 
-        //Debug.Log(serializedData);
+        savedEntities.savedEntitiesList.Add(savedEntityData);
+        var serializedData = JsonUtility.ToJson(savedEntities);
+        File.WriteAllText(saveEntitiesPath, serializedData);
+        deserializedData = serializedData;
+        
+        Debug.Log("Entity Saved");
     }
 
     public void DeserializeSavedEntities()
@@ -126,8 +135,8 @@ public class EntityManager : MonoBehaviour
             return;
         }
         
-        var data = File.ReadAllText(saveEntitiesPath);
-        savedEntities = JsonUtility.FromJson(data, typeof(SavedEntities)) as SavedEntities;
+        deserializedData = File.ReadAllText(saveEntitiesPath);
+        savedEntities = JsonUtility.FromJson(deserializedData, typeof(SavedEntities)) as SavedEntities;
     }
 
     public async void SpawnEntityAsync(SavedEntity savedEntity, Vector3 spawnPoint) 
