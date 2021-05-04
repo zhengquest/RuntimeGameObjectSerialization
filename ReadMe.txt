@@ -2,7 +2,7 @@ Built in Unity 2020.3.5f1, Android Platform, 1920 * 1080 Portrait
 
 summary:
 This is a runtime serialization system designed for saving player customized entities during gameplay (for example, a survival game where player build a custom house with given parts).
-Player can choose one of the two gameobjects and assign one or more behaviours to it (explose or add points). The behaviours have parameters for customization. Press save, The created entity is serialized and saved for later use.
+Player can choose one of the two gameobjects and assign one or more behaviours to it (explose or add points). The behaviours have parameters for customization. Press save, The created entity is serialized and saved for later use. Player can then go into test mode to test the entities that are just created. clicking on them to see the behaviours executed with the saved parameters.
 
 notes:
 1. use addressable AssetReference type to serialize in game object prefab references. This type has a very small size and thus much faster to serialize than the entire prefab file. (EntityManager.inGameObjects)
